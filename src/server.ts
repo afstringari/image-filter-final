@@ -2,6 +2,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import {filterImageFromURL, deleteLocalFiles} from './util/util';
 
+
 (async () => {
 
   // Init the Express application
@@ -28,7 +29,23 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
   //   the filtered image file [!!TIP res.sendFile(filteredpath); might be useful]
 
   /**************************************************************************** */
-
+  app.get( "/filteredimage", async ( req, res ) => {
+    let image_url = req.query.image_url;
+    // validate the image_url query else 404 url is not correct
+    if (image_url) { 
+      // call filterImageFromURL(image_url) to filter the image
+      filterImageFromURL(image_url).then((response) => {
+        // send the resulting file in the response
+        res.sendFile(response); 
+        // deletes any files on the server on finish of the response
+        res.on('finish', function() {
+          deleteLocalFiles([response]);
+        });
+      });
+    } else {
+      res.status(404).send("image_url not is not correct");
+    }
+  });
   //! END @TODO1
   
   // Root Endpoint
